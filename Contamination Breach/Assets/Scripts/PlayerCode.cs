@@ -10,7 +10,7 @@ public class PlayerCode : MonoBehaviour
     public float speed = 1000;
     void Start()
     {
-        
+        rigidbody.freezeRotation = true; //stops sprite rotating from physics
     }
 
     // Update is called once per frame
@@ -27,8 +27,7 @@ public class PlayerCode : MonoBehaviour
         if (inputTests[0] || inputTests[1] || inputTests[2] || inputTests[3]) 
         {
             rigidbody.velocity = velocityLocal.normalized * speed;
-            
-            transform.rotation = Quaternion.identity;
+       
         }
         else if (rigidbody.velocity != new Vector2(0, 0)) //makes sure velocities from collisions don't cause any movement
         {
