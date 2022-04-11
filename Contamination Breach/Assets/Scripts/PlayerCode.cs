@@ -8,7 +8,7 @@ public class PlayerCode : MonoBehaviour
     public Rigidbody2D rigidbody;
     public GameObject camera;
     public GameObject flashlight;
-    public float speed = 1000;
+    public float speed = 1000; //note this number is not correct since it is different in unity editor
     void Start()
     {
         //rigidbody.freezeRotation = true; //stops sprite rotating from physics
@@ -26,20 +26,21 @@ public class PlayerCode : MonoBehaviour
     {
         bool[] inputTests = new bool[] { Input.GetKey(KeyCode.A), Input.GetKey(KeyCode.D), Input.GetKey(KeyCode.W), Input.GetKey(KeyCode.S) };
         Vector2 velocityLocal = new Vector2(Convert.ToInt32(inputTests[1]) - Convert.ToInt32(inputTests[0]), Convert.ToInt32(inputTests[2]) - Convert.ToInt32(inputTests[3]));
-        if (inputTests[0] || inputTests[1] || inputTests[2] || inputTests[3]) 
-        {
-            rigidbody.velocity = velocityLocal.normalized * speed;
-       
-        }
-        else if (rigidbody.velocity != new Vector2(0, 0)) //makes sure velocities from collisions don't cause any movement
-        {
-            rigidbody.velocity = new Vector2(0, 0);
-        }
+        rigidbody.velocity = velocityLocal.normalized * speed;
     }
 
-    void RotateToMouse()
+        void RotateToMouse()
     {
         Vector3 mousePos = camera.GetComponent<Camera>().ScreenToWorldPoint(Input.mousePosition);//Input.mousePosition;
         transform.rotation = Quaternion.LookRotation(Vector3.forward, mousePos - transform.position);
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "Wall")
+        {
+            rigidbody.velocity = Vector2.zero;
+            Debug.Log("entered");
+        }
     }
 }
