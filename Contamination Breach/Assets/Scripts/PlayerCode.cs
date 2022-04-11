@@ -7,10 +7,11 @@ public class PlayerCode : MonoBehaviour
 {
     public Rigidbody2D rigidbody;
     public GameObject camera;
+    public GameObject flashlight;
     public float speed = 1000;
     void Start()
     {
-        rigidbody.freezeRotation = true; //stops sprite rotating from physics
+        //rigidbody.freezeRotation = true; //stops sprite rotating from physics
     }
 
     // Update is called once per frame
@@ -18,6 +19,7 @@ public class PlayerCode : MonoBehaviour
     {
         MovePlayer();
         camera.transform.position = new Vector3(transform.position.x, transform.position.y, -1); //keeps camra at player's position (if making that child of player, then camera will rotate with player)
+        RotateToMouse();
     }
 
     void MovePlayer() //uses input from player to generate normalized velocity (numbers always between 0 and 1). will then multiply that by speed and Time.deltaTime
@@ -33,5 +35,11 @@ public class PlayerCode : MonoBehaviour
         {
             rigidbody.velocity = new Vector2(0, 0);
         }
+    }
+
+    void RotateToMouse()
+    {
+        Vector3 mousePos = camera.GetComponent<Camera>().ScreenToWorldPoint(Input.mousePosition);//Input.mousePosition;
+        transform.rotation = Quaternion.LookRotation(Vector3.forward, mousePos - transform.position);
     }
 }
