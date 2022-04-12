@@ -149,7 +149,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 2.53, y: 2.16}
+  m_Size: {x: 2.89, y: 2.24}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -218,13 +218,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 6197665390660618246}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: df0548339b7d4154ab409821ccde8b66, type: 3}
+  m_Script: {fileID: 11500000, guid: 3c35344f7c3327544b2c02e3d3e95e96, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   camera: {fileID: 0}
   flashlight: {fileID: 1226499906444524223}
   sprite: {fileID: 2532671402333854338}
-  speed: 1000
+  speed: 5
 --- !u!50 &4750071604158476015
 Rigidbody2D:
   serializedVersion: 4
