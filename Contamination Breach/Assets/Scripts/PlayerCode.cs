@@ -11,7 +11,6 @@ public class PlayerCode : MonoBehaviour
     public float speed = 1000; //note this number is not correct since it is different in unity editor
     void Start()
     {
-        //rigidbody.freezeRotation = true; //stops sprite rotating from physics
     }
 
     // Update is called once per frame
@@ -33,14 +32,5 @@ public class PlayerCode : MonoBehaviour
     {
         Vector3 mousePos = camera.GetComponent<Camera>().ScreenToWorldPoint(Input.mousePosition);//Input.mousePosition;
         transform.rotation = Quaternion.LookRotation(Vector3.forward, mousePos - transform.position);
-    }
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.tag == "Wall")
-        {
-            rigidbody.velocity = Vector2.zero;
-            Debug.Log("entered");
-        }
     }
 }
