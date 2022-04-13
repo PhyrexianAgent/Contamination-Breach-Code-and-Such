@@ -224,6 +224,7 @@ MonoBehaviour:
   camera: {fileID: 0}
   flashlight: {fileID: 1226499906444524223}
   sprite: {fileID: 2532671402333854338}
+  animPlayer: {fileID: 4889752443330229439}
   speed: 1000
 --- !u!50 &4750071604158476015
 Rigidbody2D:
