@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7658009742023306427}
   - component: {fileID: 7872764243445533515}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Flashlight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -83,7 +83,7 @@ GameObject:
   - component: {fileID: 422014692307403629}
   - component: {fileID: 9046441172818398504}
   - component: {fileID: 4889752443330229439}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Player Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -100,7 +100,8 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 3328516110889020653}
   m_Father: {fileID: 4111447141806216434}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
@@ -144,7 +145,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 3
-  m_Sprite: {fileID: 21300000, guid: b706664cf5025d841a5235a10860f3f3, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 59d309ea49d4d8a4291218ac15ecf215, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -186,7 +187,7 @@ GameObject:
   - component: {fileID: 5201080860549103101}
   - component: {fileID: 4750071604158476015}
   - component: {fileID: 4562768000258622016}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -226,6 +227,7 @@ MonoBehaviour:
   sprite: {fileID: 2532671402333854338}
   animPlayer: {fileID: 4889752443330229439}
   speed: 1000
+  shootPoint: {fileID: 3328516110889020653}
 --- !u!50 &4750071604158476015
 Rigidbody2D:
   serializedVersion: 4
@@ -273,3 +275,33 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1.2429553, y: 1.6331565}
   m_EdgeRadius: 0
+--- !u!1 &8936890014595899743
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3328516110889020653}
+  m_Layer: 3
+  m_Name: Shoot Point
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3328516110889020653
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8936890014595899743}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.189, y: -0.548, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 422014692307403629}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

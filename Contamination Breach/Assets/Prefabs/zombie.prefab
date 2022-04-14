@@ -11,9 +11,11 @@ GameObject:
   - component: {fileID: 6062848427675501595}
   - component: {fileID: 1936541512251880988}
   - component: {fileID: 791843483012247211}
+  - component: {fileID: 5301475249946391357}
+  - component: {fileID: 8706132037329072699}
   m_Layer: 0
   m_Name: Zombie
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -69,7 +71,54 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pos: 0
   speed: 0
-  target: {fileID: 0}
+  sprite: {fileID: 4020642219609150200}
+--- !u!50 &5301475249946391357
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 196560773252666035}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 100000
+  m_LinearDrag: 0
+  m_AngularDrag: 1000
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
+--- !u!61 &8706132037329072699
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 196560773252666035}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: -0.024900429, y: -0.07462707}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 0.11517565, y: 0.44174522}
+  m_EdgeRadius: 0
 --- !u!1 &4020642219609150200
 GameObject:
   m_ObjectHideFlags: 0
@@ -80,6 +129,8 @@ GameObject:
   m_Component:
   - component: {fileID: 515681630381258125}
   - component: {fileID: 4219180898071721239}
+  - component: {fileID: 4062799613232858236}
+  - component: {fileID: 3483402408005120226}
   m_Layer: 0
   m_Name: Sprite
   m_TagString: Untagged
@@ -141,7 +192,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 3
-  m_Sprite: {fileID: -9173659663290667276, guid: 6522dc6ffba4a77438d079ae75f061b7, type: 3}
+  m_Sprite: {fileID: -8998285850293433457, guid: 6522dc6ffba4a77438d079ae75f061b7, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -152,3 +203,53 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &4062799613232858236
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4020642219609150200}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7db70e0ea77f5ac47a8f4565a9406397, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ShadowGroup: 0
+  m_HasRenderer: 1
+  m_UseRendererSilhouette: 1
+  m_CastsShadows: 1
+  m_SelfShadows: 0
+  m_ApplyToSortingLayers: 00000000
+  m_ShapePath:
+  - {x: -0.05732422, y: -0.18497531, z: 0}
+  - {x: -0.016641237, y: -0.19262627, z: 0}
+  - {x: 0.027355956, y: -0.1845433, z: 0}
+  - {x: 0.055934142, y: -0.16761196, z: 0}
+  - {x: 0.055332948, y: -0.027465317, z: 0}
+  - {x: 0.06821136, y: 0.07006142, z: 0}
+  - {x: 0.046877287, y: 0.13428633, z: 0}
+  - {x: -0.05628357, y: 0.145033, z: 0}
+  - {x: -0.062397767, y: 0.038887337, z: 0}
+  m_ShapePathHash: 554377704
+  m_Mesh: {fileID: 0}
+  m_InstanceId: 48516
+--- !u!95 &3483402408005120226
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4020642219609150200}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: dd7ea10fdf874ba45bba01395b47293d, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
