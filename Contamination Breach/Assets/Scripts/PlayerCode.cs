@@ -16,6 +16,13 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     const string WEAPON_SHOT_GUN = "Shot Gun";
 
     const float HAND_GUN_DAMAGE = 34;
+    const int SHOT_GUN_SPREAD_COUNT = 15;
+    const float SHOT_GUN_SPREAD_DIFF = 25;
+
+    struct ShotRay
+    {
+        public Vector2 startPoint, endPoint;
+    }
 
     public GameObject camera;
     public GameObject flashlight;
@@ -27,7 +34,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     private Rigidbody2D rigidbody;
     
     private string currentState = STATE_IDLE;
-    private string currentWeapon = WEAPON_HAND_GUN;
+    private string currentWeapon = WEAPON_SHOT_GUN;
     private bool isAttacking = false;
     private bool isReloading = false;
     private Vector2 handGunShootPos = new Vector2(0.55f, 1.17f);
@@ -35,8 +42,9 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     private Ray2D basicShootRay;// = new Ray2D(handGunShootPos);
 
     private bool wasShot = false;
-    private Vector2 endPoint;
-    private Vector2 startPoint;
+    private ShotRay[] shots = new ShotRay[SHOT_GUN_SPREAD_COUNT];
+
+    
     
 
     void Start()
@@ -55,15 +63,41 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
         TestForInput();
         if (wasShot)
         {
-            Debug.DrawLine(startPoint, endPoint, Color.red);
+            foreach (ShotRay ray in shots)
+            {
+                Debug.DrawLine(ray.startPoint, ray.endPoint, Color.red);
+            }
         }
+    }
+
+    void ShootShotGun()
+    {
+        float[] angles = { transform.rotation.eulerAngles.z + SHOT_GUN_SPREAD_DIFF, transform.rotation.eulerAngles.z - SHOT_GUN_SPREAD_DIFF };
+        Vector2 direction;
+        float randAngle;
+        RaycastHit2D hit;
+        for (int i=0; i<SHOT_GUN_SPREAD_COUNT; i++)
+        {
+            randAngle = UnityEngine.Random.Range(angles[0], angles[1]);
+            hit = ShootGunNormal(randAngle);
+            shots[i].endPoint = hit.point;
+            shots[i].startPoint = shootPoint.position;
+        }
+        wasShot = true;
     }
 
     void TestForInput() //tests for various inputs to do various things not related to movement
     {
         if (Input.GetKeyDown(KeyCode.Mouse0) && !isReloading)
         {
-            ShootGunNormal();
+            if (currentWeapon == WEAPON_SHOT_GUN)
+            {
+                ShootShotGun();
+            }
+            else if (currentWeapon != WEAPON_KNIFE)
+            {
+                ShootGunNormal();
+            }
             ChangeCurrentAnim(STATE_ATTACK);
         }
         if (Input.GetKeyDown(KeyCode.J))
@@ -83,19 +117,19 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
         }
     }
 
-    Vector2 GetDirectionToMouse()
+    Vector2 GetShootDirection(float angleDeg)
     {
         //Vector2 mousePos = transform.InverseTransformPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition));
         //return (mousePos - (Vector2)transform.position).normalized;
         //Debug.Log(transform.rotation.eulerAngles);
-        float angle = Mathf.Deg2Rad * (transform.rotation.eulerAngles.z + 90);
+        float angle = Mathf.Deg2Rad * (angleDeg + 90);
         Vector2 newPos = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
         return newPos.normalized;
     }
 
-    void ShootGunNormal()
+    RaycastHit2D ShootGunNormal(float angle = -1)
     {
-        Vector2 direction = GetDirectionToMouse();
+        Vector2 direction = GetShootDirection(angle != -1 ? angle : transform.rotation.eulerAngles.z);
         RaycastHit2D hit = Physics2D.Raycast(shootPoint.position, direction, Mathf.Infinity, 3);
 
 
@@ -111,6 +145,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
         //endPoint = hit.point;//transform.InverseTransformPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition));
         //startPoint = transform.position;
         //wasShot = true;
+        return hit;
     }
 
     void MovePlayer() //uses input from player to generate normalized velocity (numbers always between 0 and 1). will then multiply that by speed and Time.deltaTime
