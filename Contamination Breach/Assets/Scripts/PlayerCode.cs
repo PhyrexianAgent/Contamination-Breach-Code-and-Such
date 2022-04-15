@@ -30,6 +30,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     public Animator animPlayer;
     public float speed = 1000; //note this number is not correct since it is different in unity editor
     public Transform shootPoint;
+    public GameObject[] soundColls;
 
     private Rigidbody2D rigidbody;
     
@@ -43,6 +44,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
 
     private bool wasShot = false;
     private ShotRay[] shots = new ShotRay[SHOT_GUN_SPREAD_COUNT];
+    private Vector2[] shotPositions = { new Vector2(1.2f, -0.55f), new Vector2(1.4f, -0.5f)};
 
     
     
@@ -86,6 +88,32 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
         wasShot = true;
     }
 
+    void DisableColls()
+    {
+        foreach (GameObject coll in soundColls)
+        {
+            coll.GetComponent<CircleCollider2D>().enabled = false;
+        }
+    }
+
+    void EmitAttackSound()
+    {
+        switch (currentWeapon)
+        {
+            case WEAPON_HAND_GUN:
+                soundColls[0].GetComponent<CircleCollider2D>().enabled = true;
+                break;
+            case WEAPON_RIFLE:
+            case WEAPON_SHOT_GUN:
+                soundColls[1].GetComponent<CircleCollider2D>().enabled = true;
+                break;
+            case WEAPON_KNIFE:
+                soundColls[2].GetComponent<CircleCollider2D>().enabled = true;
+                break;
+        }
+        Invoke("DisableColls", 0.3f);
+    }
+
     void TestForInput() //tests for various inputs to do various things not related to movement
     {
         if (Input.GetKeyDown(KeyCode.Mouse0) && !isReloading)
@@ -99,6 +127,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
                 ShootGunNormal();
             }
             ChangeCurrentAnim(STATE_ATTACK);
+            EmitAttackSound();
         }
         if (Input.GetKeyDown(KeyCode.J))
         {
@@ -138,7 +167,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
             //Debug.DrawLine(basicShootRay.origin, hit.collider.transform.position, Color.white);
             if (hit.collider.gameObject.tag == "Enemy")
             {
-                hit.transform.gameObject.GetComponent<zombieController>().WasShot();
+                hit.transform.gameObject.GetComponent<zombieController>().WasShot(30);
             }
             
         }
@@ -186,7 +215,6 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
             else if (newState == STATE_RELOAD && currentWeapon != WEAPON_KNIFE)
             {
                 isReloading = true;
-                Debug.Log("doing anim");
                 Invoke("OnEndReload", ChangeTimeFromWeapon(animPlayer.GetCurrentAnimatorStateInfo(0).length, oldState));
             }
         }
@@ -235,14 +263,34 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     {
         isReloading = false;
         ChangeCurrentAnim(STATE_IDLE);
-        Debug.Log("getting to end");
     }
 
     void SwitchWeapon(string newWeapon)
     {
         currentWeapon = newWeapon;
         animPlayer.Play(currentWeapon+" "+currentState);
-       
+        switch (currentWeapon)
+        {
+            case WEAPON_KNIFE:
+            case WEAPON_HAND_GUN:
+                flashlight.transform.localPosition = shotPositions[0];
+                shootPoint.localPosition = shotPositions[0];
+                break;
+            case WEAPON_RIFLE:
+            case WEAPON_SHOT_GUN:
+                flashlight.transform.localPosition = shotPositions[1];
+                shootPoint.localPosition = shotPositions[1];
+                break;
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        //Debug.Log(collision.gameObject.name);
+        if (collision.gameObject.tag == "Attack Area")
+        {
+            collision.gameObject.transform.parent.GetComponent<zombieController>().Attack();
+        }
     }
 
     //.505 .53
