@@ -19,6 +19,7 @@ public class zombieController : MonoBehaviour
     public GameObject sprite;
     public float attackDamage = 20;
     public Sprite deadImage;
+    public CircleCollider2D deathSound;
 
     // Start is called before the first frame update
     private Rigidbody2D rb;
@@ -30,8 +31,8 @@ public class zombieController : MonoBehaviour
     private Vector2 currentTarget;
     private Vector2 oldPos;
     private float health = 100;
-
-    private bool accelerated = false;
+    private Collider2D targetColl;
+    private bool playerFound = false;
     
     
     void Start()
@@ -47,6 +48,7 @@ public class zombieController : MonoBehaviour
         anim = sprite.GetComponent<Animator>();
         //anim.enabled = false;
         startingPos = transform.position;
+        
        
     }
 
@@ -59,11 +61,7 @@ public class zombieController : MonoBehaviour
                 if (agent.remainingDistance < 0.01f)//agent.velocity.magnitude < 0.01 && accelerated) //for some reason when sound causes a loop for walking, anim never plays (have no clue why)
                 {
                     DoAnimation(IDLE);
-                    accelerated = false;
-                }
-                else if (agent.velocity.magnitude > 0.1)
-                {
-                    accelerated = true;
+                    agent.isStopped = true;
                 }
                 oldPos = transform.position;
                 SetRotation();
@@ -75,24 +73,41 @@ public class zombieController : MonoBehaviour
                 }
                 break;
         }
+        if (playerFound)
+        {
+            FollowTarget(targetColl.transform.position);
+            DoAnimation(WALK);
+        }
+        if (!anim.GetCurrentAnimatorStateInfo(0).IsName(currentState))
+        {
+            DoAnimation(currentState);
+        }
     }
 
-    public void WasShot(float damage)
+    void FollowTarget(Vector2 targetPos)
+    {
+        currentTarget = targetPos;
+        agent.SetDestination(currentTarget);
+        agent.isStopped = false;
+    }
+
+    public void TakeDamage(float damage)
     {
         health -= damage;
         if (health <= 0)
         {
-            Debug.Log("is dead");
             DoAnimation(DEAD);
             Invoke("MakeSelfDead", anim.GetCurrentAnimatorStateInfo(0).length - 0.85f);
             agent.isStopped = true;
             GetComponent<BoxCollider2D>().enabled = false;
+            deathSound.enabled = true;
+            Debug.Log("died");
         }
     }
 
     void DoAnimation(string animName)
     {
-        if (currentState != animName && currentState != DEAD)
+        if ((currentState != animName && currentState != DEAD) || anim.GetCurrentAnimatorStateInfo(0).IsName(animName))
         {
             if (animName == DEAD)
                 Debug.Log("doing dead anim");
@@ -106,25 +121,64 @@ public class zombieController : MonoBehaviour
     {
         anim.enabled = false;
         sprite.GetComponent<SpriteRenderer>().sprite = deadImage;
+        deathSound.enabled = false;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        Debug.Log(collision.gameObject.name);
         if (collision.gameObject.tag == "Sound" && currentState != DEAD)
         {
-            currentTarget = collision.transform.position;
+            FollowTarget(collision.transform.position);
             DoAnimation(WALK);
-            agent.SetDestination(currentTarget);
         }
-        else
+        else if (collision.gameObject.tag == "Player Attack")
         {
-            Debug.Log(collision.gameObject.tag);
+            if (!playerFound)
+            {
+                TakeDamage(100);
+            }
+            else
+            {
+                TakeDamage(collision.transform.parent.gameObject.GetComponent<PlayerCode>().currentDamage);
+            }
         }
+        else if (collision.gameObject.tag == "Player Area" && currentState != DEAD)
+        {
+            playerFound = true;
+            DoAnimation(WALK);
+            targetColl = collision;
+            FollowTarget(collision.transform.position);
+            collision.transform.parent.gameObject.GetComponent<PlayerCode>().isBeingChased = true;
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (playerFound)
+        {
+            playerFound = false;
+            agent.isStopped = true;
+            DoAnimation(IDLE);
+            Invoke("EndWalk", 1f);
+            collision.transform.parent.gameObject.GetComponent<PlayerCode>().isBeingChased = false;
+            targetColl = null;
+        }
+    }
+
+    void EndWalk()
+    {
+        DoAnimation(IDLE);
     }
 
     public void Attack()
     {
         DoAnimation(ATTACK);
+    }
+
+    void ResetColl()
+    {
+        sprite.GetComponent<BoxCollider2D>().enabled = true;
     }
 
     void SetRotation()

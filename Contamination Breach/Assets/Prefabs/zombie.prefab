@@ -32,6 +32,7 @@ Transform:
   m_LocalScale: {x: 3, y: 3, z: 1}
   m_Children:
   - {fileID: 515681630381258125}
+  - {fileID: 8956861690426886739}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -45,7 +46,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 3.5
+  m_Speed: 5
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
@@ -74,6 +75,7 @@ MonoBehaviour:
   sprite: {fileID: 4020642219609150200}
   attackDamage: 20
   deadImage: {fileID: 5784905872451994919, guid: ccadb56073a72eb4f841eaf9dc3704f5, type: 3}
+  deathSound: {fileID: 8474841401430342246}
 --- !u!50 &5301475249946391357
 Rigidbody2D:
   serializedVersion: 4
@@ -108,7 +110,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.0041453, y: -0.056705073}
+  m_Offset: {x: -0.006998064, y: -0.056705073}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -119,7 +121,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.07191594, y: 0.18095073}
+  m_Size: {x: 0.10469055, y: 0.18095073}
   m_EdgeRadius: 0
 --- !u!1 &4020642219609150200
 GameObject:
@@ -134,7 +136,7 @@ GameObject:
   - component: {fileID: 4062799613232858236}
   - component: {fileID: 3483402408005120226}
   - component: {fileID: 1859049757030905502}
-  m_Layer: 3
+  m_Layer: 8
   m_Name: Sprite
   m_TagString: Attack Area
   m_Icon: {fileID: 0}
@@ -236,7 +238,7 @@ MonoBehaviour:
   - {x: -0.015756609, y: 0.024204219, z: 0}
   m_ShapePathHash: 506561985
   m_Mesh: {fileID: 0}
-  m_InstanceId: 71374
+  m_InstanceId: 90062
 --- !u!95 &3483402408005120226
 Animator:
   serializedVersion: 3
@@ -269,7 +271,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.12, y: -0.06}
+  m_Offset: {x: 0.14, y: -0.059999995}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -280,5 +282,52 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.12, y: 0.2}
+  m_Size: {x: 0.16830325, y: 0.2}
   m_EdgeRadius: 0
+--- !u!1 &6826637836466267747
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8956861690426886739}
+  - component: {fileID: 8474841401430342246}
+  m_Layer: 9
+  m_Name: Death Sound
+  m_TagString: Sound
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8956861690426886739
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6826637836466267747}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 6062848427675501595}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!58 &8474841401430342246
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6826637836466267747}
+  m_Enabled: 0
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 2

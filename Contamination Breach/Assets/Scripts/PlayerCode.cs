@@ -18,6 +18,10 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     const float HAND_GUN_DAMAGE = 34;
     const int SHOT_GUN_SPREAD_COUNT = 15;
     const float SHOT_GUN_SPREAD_DIFF = 25;
+    const float KNIFE_DAMAGE_SNEAK = 100;
+    const float KNIFE_DAMAGE_NORMAL = 50;
+    const float RIFLE_DAMAGE = 25;
+    const float SHOT_GUN_DAMAGE = 30;
 
     struct ShotRay
     {
@@ -31,11 +35,16 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     public float speed = 1000; //note this number is not correct since it is different in unity editor
     public Transform shootPoint;
     public GameObject[] soundColls;
+    public CircleCollider2D sprintingColl;
+    public BoxCollider2D knifeAttackArea;
+
+    public bool isBeingChased = false;
+    public float currentDamage = KNIFE_DAMAGE_NORMAL;
 
     private Rigidbody2D rigidbody;
     
     private string currentState = STATE_IDLE;
-    private string currentWeapon = WEAPON_SHOT_GUN;
+    private string currentWeapon = WEAPON_KNIFE;
     private bool isAttacking = false;
     private bool isReloading = false;
     private Vector2 handGunShootPos = new Vector2(0.55f, 1.17f);
@@ -45,6 +54,10 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     private bool wasShot = false;
     private ShotRay[] shots = new ShotRay[SHOT_GUN_SPREAD_COUNT];
     private Vector2[] shotPositions = { new Vector2(1.2f, -0.55f), new Vector2(1.4f, -0.5f)};
+    private bool isSprinting = false;
+    
+    
+
 
     
     
@@ -54,6 +67,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
         rigidbody = GetComponent<Rigidbody2D>();
         animPlayer = sprite.GetComponent<Animator>();
         basicShootRay = new Ray2D(handGunShootPos, Vector2.left);
+        knifeAttackArea.enabled = false;
     }
 
     // Update is called once per frame
@@ -75,7 +89,6 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     void ShootShotGun()
     {
         float[] angles = { transform.rotation.eulerAngles.z + SHOT_GUN_SPREAD_DIFF, transform.rotation.eulerAngles.z - SHOT_GUN_SPREAD_DIFF };
-        Vector2 direction;
         float randAngle;
         RaycastHit2D hit;
         for (int i=0; i<SHOT_GUN_SPREAD_COUNT; i++)
@@ -107,11 +120,19 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
             case WEAPON_SHOT_GUN:
                 soundColls[1].GetComponent<CircleCollider2D>().enabled = true;
                 break;
-            case WEAPON_KNIFE:
-                soundColls[2].GetComponent<CircleCollider2D>().enabled = true;
-                break;
         }
         Invoke("DisableColls", 0.3f);
+    }
+
+    void KnifeAttack()
+    {
+        knifeAttackArea.enabled = true;
+        Invoke("DisableKnifeAttack", 0.4f);
+    }
+
+    void DisableKnifeAttack()
+    {
+        knifeAttackArea.enabled = false;
     }
 
     void TestForInput() //tests for various inputs to do various things not related to movement
@@ -121,19 +142,26 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
             if (currentWeapon == WEAPON_SHOT_GUN)
             {
                 ShootShotGun();
+                EmitAttackSound();
             }
             else if (currentWeapon != WEAPON_KNIFE)
             {
                 ShootGunNormal();
+                EmitAttackSound();
+            }
+            else
+            {
+                Invoke("KnifeAttack", 0.25f);
+                //KnifeAttack();
             }
             ChangeCurrentAnim(STATE_ATTACK);
-            EmitAttackSound();
+            
         }
         if (Input.GetKeyDown(KeyCode.J))
         {
             if (currentWeapon == WEAPON_KNIFE)
             {
-                SwitchWeapon(WEAPON_HAND_GUN);
+                SwitchWeapon(WEAPON_RIFLE);
             }
             else
             {
@@ -144,13 +172,33 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
         {
             ChangeCurrentAnim(STATE_RELOAD);
         }
+        isSprinting = Input.GetKey(KeyCode.LeftShift);
+        sprintingColl.enabled = isSprinting || isBeingChased;
+    }
+
+    float GetDamageToDeal()
+    {
+        float foundDamage = 0;
+        switch (currentWeapon)
+        {
+            case WEAPON_HAND_GUN:
+                foundDamage = HAND_GUN_DAMAGE;
+                break;
+            case WEAPON_KNIFE:
+                foundDamage = KNIFE_DAMAGE_NORMAL;
+                break;
+            case WEAPON_RIFLE:
+                foundDamage = RIFLE_DAMAGE;
+                break;
+            case WEAPON_SHOT_GUN:
+                foundDamage = SHOT_GUN_DAMAGE;
+                break;
+        }
+        return foundDamage;
     }
 
     Vector2 GetShootDirection(float angleDeg)
     {
-        //Vector2 mousePos = transform.InverseTransformPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-        //return (mousePos - (Vector2)transform.position).normalized;
-        //Debug.Log(transform.rotation.eulerAngles);
         float angle = Mathf.Deg2Rad * (angleDeg + 90);
         Vector2 newPos = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
         return newPos.normalized;
@@ -164,16 +212,12 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
 
         if (hit.collider != null)
         {
-            //Debug.DrawLine(basicShootRay.origin, hit.collider.transform.position, Color.white);
             if (hit.collider.gameObject.tag == "Enemy")
             {
-                hit.transform.gameObject.GetComponent<zombieController>().WasShot(30);
+                hit.transform.gameObject.GetComponent<zombieController>().TakeDamage(currentDamage);
             }
             
         }
-        //endPoint = hit.point;//transform.InverseTransformPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-        //startPoint = transform.position;
-        //wasShot = true;
         return hit;
     }
 
@@ -181,7 +225,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     {
         bool[] inputTests = new bool[] { Input.GetKey(KeyCode.A), Input.GetKey(KeyCode.D), Input.GetKey(KeyCode.W), Input.GetKey(KeyCode.S) };
         Vector2 velocityLocal = new Vector2(Convert.ToInt32(inputTests[1]) - Convert.ToInt32(inputTests[0]), Convert.ToInt32(inputTests[2]) - Convert.ToInt32(inputTests[3]));
-        rigidbody.velocity = velocityLocal.normalized * speed;
+        rigidbody.velocity = velocityLocal.normalized * (speed * (isSprinting ? 2 : 1));
 
         if (!isAttacking && !isReloading)
         {
@@ -273,23 +317,27 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
         {
             case WEAPON_KNIFE:
             case WEAPON_HAND_GUN:
-                flashlight.transform.localPosition = shotPositions[0];
                 shootPoint.localPosition = shotPositions[0];
                 break;
             case WEAPON_RIFLE:
             case WEAPON_SHOT_GUN:
-                flashlight.transform.localPosition = shotPositions[1];
                 shootPoint.localPosition = shotPositions[1];
                 break;
         }
+        //flashlight.transform.localPosition = shootPoint.localPosition;
+        currentDamage = GetDamageToDeal();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        //Debug.Log(collision.gameObject.name);
+        zombieController enemyScript;
         if (collision.gameObject.tag == "Attack Area")
         {
-            collision.gameObject.transform.parent.GetComponent<zombieController>().Attack();
+            enemyScript = collision.gameObject.transform.parent.GetComponent<zombieController>();
+            enemyScript.Attack();
+            enemyScript.sprite.GetComponent<BoxCollider2D>().enabled = false;
+            enemyScript.Invoke("ResetColl", 1);
+            isBeingChased = true;
         }
     }
 
