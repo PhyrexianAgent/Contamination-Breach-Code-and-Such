@@ -23,6 +23,8 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     const float RIFLE_DAMAGE = 25;
     const float SHOT_GUN_DAMAGE = 30;
     const float RELOAD_TIME = 1.7f;
+    const float STEP_MAX_NUM_WALK = 0.7f;
+    const float STEP_MAX_NUM_RUN = 0.5f;
 
     struct ShotRay
     {
@@ -45,6 +47,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
 
     public bool isBeingChased = false;
     public float currentDamage = KNIFE_DAMAGE_NORMAL;
+    public AudioClip[] stepSounds;
 
     private Rigidbody2D rigidbody;
     
@@ -62,6 +65,8 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     private Vector2[] shotPositions = { new Vector2(1.2f, -0.55f), new Vector2(1.4f, -0.5f)};
     private bool isSprinting = false;
     private List<string> collectedCards = new List<string>();
+    private float stepcount = 0;
+    private int currentStepIndex = 0;
     
 
 
@@ -90,6 +95,22 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
             {
                 Debug.DrawLine(ray.startPoint, ray.endPoint, Color.red);
             }
+        }
+        if (currentState == STATE_RUNNING)
+        {
+            DoStep();
+        }
+    }
+
+    void DoStep()
+    {
+        stepcount += Time.deltaTime;
+        if (stepcount >= (!isSprinting ? STEP_MAX_NUM_WALK : STEP_MAX_NUM_RUN))
+        {
+            stepcount = 0;
+            sprite.GetComponent<AudioSource>().clip = stepSounds[currentStepIndex];
+            sprite.GetComponent<AudioSource>().Play();
+            currentStepIndex = (currentStepIndex + 1) < stepSounds.Length ? currentStepIndex + 1 : 0;
         }
     }
 
