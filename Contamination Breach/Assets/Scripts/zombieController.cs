@@ -30,7 +30,7 @@ public class zombieController : MonoBehaviour
     private Vector2 startingPos;
     private Vector2 currentTarget;
     private Vector2 oldPos;
-    private float health = 100;
+    public float health = 100;
     private Collider2D targetColl;
     private bool playerFound = false;
     

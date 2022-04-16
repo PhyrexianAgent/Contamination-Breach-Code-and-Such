@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using UnityEngine.UI;
+using TMPro;
+using UnityEngine.SceneManagement;
 
 public class PlayerCode : MonoBehaviour //future note, the rifle reload is very slightly off but may not be noticable
 {
@@ -15,7 +18,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     const string WEAPON_RIFLE = "Rifle";
     const string WEAPON_SHOT_GUN = "Shot Gun";
 
-    const float HAND_GUN_DAMAGE = 34;
+    const float HAND_GUN_DAMAGE = 40;
     const int SHOT_GUN_SPREAD_COUNT = 15;
     const float SHOT_GUN_SPREAD_DIFF = 25;
     const float KNIFE_DAMAGE_SNEAK = 100;
@@ -44,10 +47,17 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     public AudioClip shotGunShot;
     public AudioClip handGunShot;
     public AudioClip reload;
+    public Slider healthBar;
+    public GameObject ammoUI;
+    public Image[] gunsUI;
+    public Image[] highlights;
+    public TextMeshProUGUI ammoText;
+    public Image ammoImage;
 
     public bool isBeingChased = false;
     public float currentDamage = KNIFE_DAMAGE_NORMAL;
     public AudioClip[] stepSounds;
+    public GameObject deathImage;
 
     private Rigidbody2D rigidbody;
     
@@ -67,7 +77,10 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     private List<string> collectedCards = new List<string>();
     private float stepcount = 0;
     private int currentStepIndex = 0;
-    
+    private int currentWeaponIndex = 0;
+    private Weapon[] weaponList = { new Weapon(WEAPON_KNIFE, true), new Weapon(WEAPON_HAND_GUN, 6, 20), new Weapon(WEAPON_RIFLE, 15, 30) };
+    private float health = 100;
+
 
 
     
@@ -80,6 +93,9 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
         basicShootRay = new Ray2D(handGunShootPos, Vector2.left);
         knifeAttackArea.enabled = false;
         audioSource = GetComponent<AudioSource>();
+        ammoUI.SetActive(false);
+        ammoImage.enabled = false;
+        //TakeDamage(100);
     }
 
     // Update is called once per frame
@@ -88,7 +104,8 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
         MovePlayer();
         camera.transform.position = new Vector3(transform.position.x, transform.position.y, -1); //keeps camra at player's position (if making that child of player, then camera will rotate with player)
         RotateToMouse();
-        TestForInput();
+        if (health > 0)
+            TestForInput();
         if (wasShot)
         {
             foreach (ShotRay ray in shots)
@@ -175,38 +192,35 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
 
     void TestForInput() //tests for various inputs to do various things not related to movement
     {
-        if (Input.GetKeyDown(KeyCode.Mouse0) && !isReloading)
+        if (Input.GetKeyDown(KeyCode.Mouse0) && !isReloading && (weaponList[currentWeaponIndex].currentClip > 0 || weaponList[currentWeaponIndex].isKnife))
         {
             if (currentWeapon == WEAPON_SHOT_GUN)
             {
                 ShootShotGun();
                 EmitAttackSound();
+                weaponList[currentWeaponIndex].currentClip--;
+                ammoText.text = weaponList[currentWeaponIndex].currentClip + "  " + weaponList[currentWeaponIndex].ammoRemaining;
             }
             else if (currentWeapon != WEAPON_KNIFE)
             {
                 ShootGunNormal();
                 EmitAttackSound();
+                weaponList[currentWeaponIndex].currentClip--;
+                ammoText.text = weaponList[currentWeaponIndex].currentClip + "  " + weaponList[currentWeaponIndex].ammoRemaining;
             }
             else
             {
                 Invoke("KnifeAttack", 0.25f);
                 //KnifeAttack();
             }
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                deathImage.SetActive(true);
+            }
             ChangeCurrentAnim(STATE_ATTACK);
             
         }
-        if (Input.GetKeyDown(KeyCode.J))
-        {
-            if (currentWeapon == WEAPON_KNIFE)
-            {
-                SwitchWeapon(WEAPON_RIFLE);
-            }
-            else
-            {
-                SwitchWeapon(WEAPON_KNIFE);
-            }
-        }
-        if (Input.GetKeyDown(KeyCode.R) && !isReloading)
+        if (Input.GetKeyDown(KeyCode.R) && !isReloading && weaponList[currentWeaponIndex].ammoRemaining > 0)
         {
             ChangeCurrentAnim(STATE_RELOAD);
             audioSource.clip = reload;
@@ -215,13 +229,32 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
             Invoke("EndReload", RELOAD_TIME);
 
         }
+        TestForWeaponChange();
         isSprinting = Input.GetKey(KeyCode.LeftShift);
         sprintingColl.enabled = isSprinting || isBeingChased;
+    }
+
+    void TestForWeaponChange()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            SwitchWeapon(weaponList[0].weaponCode, 0);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            SwitchWeapon(weaponList[1].weaponCode, 1);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            SwitchWeapon(weaponList[2].weaponCode, 2);
+        }
     }
 
     void EndReload()
     {
         isReloading = false;
+        weaponList[currentWeaponIndex].ReloadWeapon();
+        ammoText.text = weaponList[currentWeaponIndex].currentClip + "  " + weaponList[currentWeaponIndex].ammoRemaining;
     }
 
     float GetDamageToDeal()
@@ -376,7 +409,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
         ChangeCurrentAnim(STATE_IDLE);
     }
 
-    void SwitchWeapon(string newWeapon)
+    void SwitchWeapon(string newWeapon, int index)
     {
         currentWeapon = newWeapon;
         animPlayer.Play(currentWeapon+" "+currentState);
@@ -391,8 +424,57 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
                 shootPoint.localPosition = shotPositions[1];
                 break;
         }
+        ChangeWeaponGUI(index);
         //flashlight.transform.localPosition = shootPoint.localPosition;
         currentDamage = GetDamageToDeal();
+    }
+
+    void ChangeWeaponGUI(int newWeaponIndex)
+    {
+        highlights[currentWeaponIndex].enabled = false;
+        currentWeaponIndex = newWeaponIndex;
+        highlights[currentWeaponIndex].enabled = true;
+        if (weaponList[currentWeaponIndex].isKnife)
+        {
+            ammoUI.SetActive(false);
+            ammoImage.enabled = false;
+        }
+        else
+        {
+            ammoUI.SetActive(true);
+            ammoImage.enabled = true;
+            ammoText.text = weaponList[currentWeaponIndex].currentClip + "  " + weaponList[currentWeaponIndex].ammoRemaining;
+        }
+    }
+
+    void TakeDamage(float damage)
+    {
+        health -= damage;
+        healthBar.value = health;
+        if (health <= 0)
+        {
+            deathImage.SetActive(true);
+            Invoke("ReturnToMainMenu", 3);
+        }
+    }
+
+    void SelectPrimary()
+    {
+        if (PlayerVarsToSave.hasShotGun)
+        {
+            weaponList[2] = new Weapon(WEAPON_SHOT_GUN, 5, 15);
+            SwitchWeapon(WEAPON_SHOT_GUN, 2);
+        }
+        else
+        {
+            weaponList[2] = new Weapon(WEAPON_RIFLE, 15, 30);
+            SwitchWeapon(WEAPON_RIFLE, 2);
+        }
+    }
+
+    void ReturnToMainMenu()
+    {
+        SceneManager.LoadScene("MainMenu");
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -401,12 +483,62 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
         if (collision.gameObject.tag == "Attack Area")
         {
             enemyScript = collision.gameObject.transform.parent.GetComponent<zombieController>();
-            enemyScript.Attack();
-            enemyScript.sprite.GetComponent<BoxCollider2D>().enabled = false;
-            enemyScript.Invoke("ResetColl", 1);
-            isBeingChased = true;
+            if (enemyScript.health > 0) 
+            {
+                enemyScript.Attack();
+                enemyScript.sprite.GetComponent<BoxCollider2D>().enabled = false;
+                enemyScript.Invoke("ResetColl", 1);
+                isBeingChased = true;
+                TakeDamage(enemyScript.attackDamage);
+            }
         }
+    }
+
+    public void ChangePrimary(bool isShotGun)
+    {
+        SelectPrimary();
+        PlayerVarsToSave.hasShotGun = isShotGun;
     }
 
     //.505 .53
 }
+
+class Weapon
+{
+    public string weaponCode;
+    public int maxClipSize;
+    public int ammoRemaining;
+    public int currentClip;
+    public bool isKnife;
+    public Weapon(string name, int clipSize, int totalAmmo)
+    {
+        weaponCode = name;
+        maxClipSize = clipSize;
+        ammoRemaining = totalAmmo;
+        ReloadWeapon();
+    }
+    public Weapon(string name, bool isKnife)
+    {
+        weaponCode = name;
+        this.isKnife = isKnife;
+    }
+
+    public void ReloadWeapon()
+    {
+        for (int i=0; i<maxClipSize && currentClip < maxClipSize; i++)
+        {
+            if (ammoRemaining > 0)
+            {
+                ammoRemaining--;
+                currentClip++;
+            }
+            else
+                break;
+        }
+    }
+}
+public static class PlayerVarsToSave 
+{
+    public static bool hasShotGun = false;
+}
+
