@@ -22,6 +22,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     const float KNIFE_DAMAGE_NORMAL = 50;
     const float RIFLE_DAMAGE = 25;
     const float SHOT_GUN_DAMAGE = 30;
+    const float RELOAD_TIME = 1.7f;
 
     struct ShotRay
     {
@@ -37,6 +38,10 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     public GameObject[] soundColls;
     public CircleCollider2D sprintingColl;
     public BoxCollider2D knifeAttackArea;
+    public AudioClip rifleShot;
+    public AudioClip shotGunShot;
+    public AudioClip handGunShot;
+    public AudioClip reload;
 
     public bool isBeingChased = false;
     public float currentDamage = KNIFE_DAMAGE_NORMAL;
@@ -48,6 +53,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     private bool isAttacking = false;
     private bool isReloading = false;
     private Vector2 handGunShootPos = new Vector2(0.55f, 1.17f);
+    private AudioSource audioSource;
 
     private Ray2D basicShootRay;// = new Ray2D(handGunShootPos);
 
@@ -56,7 +62,6 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     private Vector2[] shotPositions = { new Vector2(1.2f, -0.55f), new Vector2(1.4f, -0.5f)};
     private bool isSprinting = false;
     private List<string> collectedCards = new List<string>();
-    
     
 
 
@@ -69,6 +74,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
         animPlayer = sprite.GetComponent<Animator>();
         basicShootRay = new Ray2D(handGunShootPos, Vector2.left);
         knifeAttackArea.enabled = false;
+        audioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -179,12 +185,22 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
                 SwitchWeapon(WEAPON_KNIFE);
             }
         }
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R) && !isReloading)
         {
             ChangeCurrentAnim(STATE_RELOAD);
+            audioSource.clip = reload;
+            audioSource.Play();
+            isReloading = true;
+            Invoke("EndReload", RELOAD_TIME);
+
         }
         isSprinting = Input.GetKey(KeyCode.LeftShift);
         sprintingColl.enabled = isSprinting || isBeingChased;
+    }
+
+    void EndReload()
+    {
+        isReloading = false;
     }
 
     float GetDamageToDeal()
@@ -229,7 +245,26 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
             }
             
         }
+        SetShotToPlay();
+        GetComponent<AudioSource>().Play();
         return hit;
+    }
+
+    void SetShotToPlay()
+    {
+        AudioSource source = GetComponent<AudioSource>();
+        switch (currentWeapon)
+        {
+            case WEAPON_RIFLE:
+                source.clip = rifleShot;
+                break;
+            case WEAPON_SHOT_GUN:
+                source.clip = shotGunShot;
+                break;
+            case WEAPON_HAND_GUN:
+                source.clip = handGunShot;
+                break;
+        }
     }
 
     void MovePlayer() //uses input from player to generate normalized velocity (numbers always between 0 and 1). will then multiply that by speed and Time.deltaTime
