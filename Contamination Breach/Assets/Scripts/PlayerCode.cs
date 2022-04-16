@@ -55,6 +55,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     private ShotRay[] shots = new ShotRay[SHOT_GUN_SPREAD_COUNT];
     private Vector2[] shotPositions = { new Vector2(1.2f, -0.55f), new Vector2(1.4f, -0.5f)};
     private bool isSprinting = false;
+    private List<string> collectedCards = new List<string>();
     
     
 
@@ -99,6 +100,16 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
             shots[i].startPoint = shootPoint.position;
         }
         wasShot = true;
+    }
+
+    public void CollectCard(string code)
+    {
+        collectedCards.Add(code);
+    }
+
+    public bool HasCard(string code)
+    {
+        return collectedCards.IndexOf(code) > -1;
     }
 
     void DisableColls()
