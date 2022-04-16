@@ -5,6 +5,7 @@ using System;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using UnityEngine.Experimental.Rendering.Universal;
 
 public class PlayerCode : MonoBehaviour //future note, the rifle reload is very slightly off but may not be noticable
 {
@@ -58,6 +59,8 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     public float currentDamage = KNIFE_DAMAGE_NORMAL;
     public AudioClip[] stepSounds;
     public GameObject deathImage;
+    public Light2D shotLight;
+    public GameObject sparkPrefab;
     //public bool lightUsable = true;
 
     private Rigidbody2D rigidbody;
@@ -81,7 +84,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     private int currentWeaponIndex = 0;
     private Weapon[] weaponList = { new Weapon(WEAPON_KNIFE, true), new Weapon(WEAPON_HAND_GUN, 6, 20), new Weapon(WEAPON_RIFLE, 15, 30) };
     private float health = 100;
-
+    private bool shotLightExist = false;
 
 
     
@@ -118,6 +121,11 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
         if (currentState == STATE_RUNNING)
         {
             DoStep();
+        }
+        if (shotLightExist)
+        {
+            shotLight.intensity -= Time.deltaTime * 10;
+            shotLightExist = shotLight.intensity > 0;
         }
     }
 
@@ -166,7 +174,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
         }
     }
 
-    void EmitAttackSound()
+    void EmitAttackSoundAndLight()
     {
         switch (currentWeapon)
         {
@@ -179,6 +187,14 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
                 break;
         }
         Invoke("DisableColls", 0.3f);
+        shotLightExist = true;
+        shotLight.intensity = 3;
+        //Invoke("DisableLightAnim", 0.2f);
+    }
+
+    void DisableLightAnim()
+    {
+        shotLight.GetComponent<Animator>().enabled = false;
     }
 
     void KnifeAttack()
@@ -199,14 +215,14 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
             if (currentWeapon == WEAPON_SHOT_GUN)
             {
                 ShootShotGun();
-                EmitAttackSound();
+                EmitAttackSoundAndLight();
                 weaponList[currentWeaponIndex].currentClip--;
                 ammoText.text = weaponList[currentWeaponIndex].currentClip + "  " + weaponList[currentWeaponIndex].ammoRemaining;
             }
             else if (currentWeapon != WEAPON_KNIFE)
             {
                 ShootGunNormal();
-                EmitAttackSound();
+                EmitAttackSoundAndLight();
                 weaponList[currentWeaponIndex].currentClip--;
                 ammoText.text = weaponList[currentWeaponIndex].currentClip + "  " + weaponList[currentWeaponIndex].ammoRemaining;
             }
@@ -298,6 +314,10 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
             if (hit.collider.gameObject.tag == "Enemy")
             {
                 hit.transform.gameObject.GetComponent<zombieController>().TakeDamage(currentDamage);
+            }
+            else
+            {
+                Instantiate(sparkPrefab, hit.point, Quaternion.identity);
             }
             
         }
