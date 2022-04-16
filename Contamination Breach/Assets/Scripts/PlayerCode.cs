@@ -58,6 +58,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     public float currentDamage = KNIFE_DAMAGE_NORMAL;
     public AudioClip[] stepSounds;
     public GameObject deathImage;
+    //public bool lightUsable = true;
 
     private Rigidbody2D rigidbody;
     
@@ -95,6 +96,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
         audioSource = GetComponent<AudioSource>();
         ammoUI.SetActive(false);
         ammoImage.enabled = false;
+        SelectPrimary();
         //TakeDamage(100);
     }
 
@@ -470,6 +472,8 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
             weaponList[2] = new Weapon(WEAPON_RIFLE, 15, 30);
             SwitchWeapon(WEAPON_RIFLE, 2);
         }
+        gunsUI[0].GetComponent<Image>().enabled = !PlayerVarsToSave.hasShotGun;
+        gunsUI[1].GetComponent<Image>().enabled = PlayerVarsToSave.hasShotGun;
     }
 
     void ReturnToMainMenu()
@@ -496,8 +500,9 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
 
     public void ChangePrimary(bool isShotGun)
     {
-        SelectPrimary();
         PlayerVarsToSave.hasShotGun = isShotGun;
+        SelectPrimary();
+        
     }
 
     //.505 .53
