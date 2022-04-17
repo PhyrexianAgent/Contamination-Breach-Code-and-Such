@@ -14,6 +14,10 @@ public class zombieController : MonoBehaviour
     const string LEFT = "Left";
     const string RIGHT = "Right";
 
+    const int SEARCHES_MAX = 2;
+    const float TIME_BETWEEN_SEARCHES = 4;
+    const float SEARCH_RADIUS = 4;
+
     public int pos;
     public float speed;
     public GameObject sprite;
@@ -33,6 +37,8 @@ public class zombieController : MonoBehaviour
     public float health = 100;
     private Collider2D targetColl;
     private bool playerFound = false;
+    private int searchesLeft = 0;
+    private bool onTheWay = false;
     
     
     void Start()
@@ -91,6 +97,29 @@ public class zombieController : MonoBehaviour
         currentTarget = targetPos;
         agent.SetDestination(currentTarget);
         agent.isStopped = false;
+    }
+
+    bool GetRandInRadius()
+    {
+        bool succeeded = false;
+        Vector2 testPos = currentTarget + (Random.insideUnitCircle * SEARCH_RADIUS);
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(testPos, out hit, SEARCH_RADIUS, 1))
+        {
+            currentTarget = hit.position;
+            succeeded = true;
+        }
+        return succeeded;
+    }
+
+    void FollowTarget()
+    {
+        if (GetRandInRadius())
+        {
+            agent.SetDestination(currentTarget);
+            agent.isStopped = false;
+        }
+
     }
 
     public void TakeDamage(float damage)
@@ -153,7 +182,24 @@ public class zombieController : MonoBehaviour
             DoAnimation(IDLE);
             PlayerVarsToSave.beingChased = false;
             targetColl = null;
+            onTheWay = false;
         }
+    }
+
+    void DoSearch()
+    {/*
+        if (searchesLeft > 0 && !onTheWay)
+        {
+            FollowTarget();
+            searchesLeft--;
+            Invoke("DoSearch", TIME_BETWEEN_SEARCHES);
+        }
+        else if (!onTheWay) 
+        {
+            agent.SetDestination(startingPos);
+        }*/
+        agent.SetDestination(startingPos);
+        Debug.Log(startingPos + " " + transform.position);
     }
 
     private void OnTriggerStay2D(Collider2D collision)
@@ -162,6 +208,9 @@ public class zombieController : MonoBehaviour
         {
             FollowTarget(collision.transform.position);
             DoAnimation(WALK);
+            searchesLeft = SEARCHES_MAX;
+            Invoke("DoSearch", TIME_BETWEEN_SEARCHES+1);
+            onTheWay = true;
         }
         else if (collision.gameObject.tag == "Player Area" && currentState != DEAD)
         {
@@ -170,6 +219,7 @@ public class zombieController : MonoBehaviour
             targetColl = collision;
             FollowTarget(collision.transform.position);
             collision.transform.parent.gameObject.GetComponent<PlayerCode>().isBeingChased = true;
+            onTheWay = true;
         }
     }
 
