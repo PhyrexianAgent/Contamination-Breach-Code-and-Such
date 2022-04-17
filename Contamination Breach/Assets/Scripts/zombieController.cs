@@ -17,7 +17,7 @@ public class zombieController : MonoBehaviour
     public int pos;
     public float speed;
     public GameObject sprite;
-    public float attackDamage = 20;
+    public float attackDamage = 15;
     public Sprite deadImage;
     public CircleCollider2D deathSound;
 
@@ -58,7 +58,7 @@ public class zombieController : MonoBehaviour
         switch (currentState)
         {
             case WALK:
-                if (agent.remainingDistance < 0.01f)//agent.velocity.magnitude < 0.01 && accelerated) //for some reason when sound causes a loop for walking, anim never plays (have no clue why)
+                if ((agent.remainingDistance < 2f && !playerFound) || agent.isStopped)//agent.velocity.magnitude < 0.01 && accelerated) //for some reason when sound causes a loop for walking, anim never plays (have no clue why)
                 {
                     DoAnimation(IDLE);
                     agent.isStopped = true;
@@ -86,6 +86,8 @@ public class zombieController : MonoBehaviour
 
     void FollowTarget(Vector2 targetPos)
     {
+        //agent.velocity = Vector3.zero;
+        //agent.isStopped = false;
         currentTarget = targetPos;
         agent.SetDestination(currentTarget);
         agent.isStopped = false;
@@ -107,7 +109,7 @@ public class zombieController : MonoBehaviour
 
     void DoAnimation(string animName)
     {
-        if ((currentState != animName && currentState != DEAD) || anim.GetCurrentAnimatorStateInfo(0).IsName(animName))
+        if ((currentState != animName && currentState != DEAD) || !anim.GetCurrentAnimatorStateInfo(0).IsName(animName))
         {
             if (animName == DEAD)
                 Debug.Log("doing dead anim");
@@ -126,13 +128,8 @@ public class zombieController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log(collision.gameObject.name);
-        if (collision.gameObject.tag == "Sound" && currentState != DEAD)
-        {
-            FollowTarget(collision.transform.position);
-            DoAnimation(WALK);
-        }
-        else if (collision.gameObject.tag == "Player Attack")
+        
+        if (collision.gameObject.tag == "Player Attack")
         {
             if (!playerFound)
             {
@@ -142,6 +139,29 @@ public class zombieController : MonoBehaviour
             {
                 TakeDamage(collision.transform.parent.gameObject.GetComponent<PlayerCode>().currentDamage);
             }
+        }
+        
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (playerFound)
+        {
+            Debug.Log("lost player");
+            playerFound = false;
+            agent.isStopped = true;
+            DoAnimation(IDLE);
+            PlayerVarsToSave.beingChased = false;
+            targetColl = null;
+        }
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "Sound" && currentState != DEAD)
+        {
+            FollowTarget(collision.transform.position);
+            DoAnimation(WALK);
         }
         else if (collision.gameObject.tag == "Player Area" && currentState != DEAD)
         {
@@ -153,19 +173,6 @@ public class zombieController : MonoBehaviour
         }
     }
 
-    private void OnTriggerExit2D(Collider2D collision)
-    {
-        if (playerFound)
-        {
-            playerFound = false;
-            agent.isStopped = true;
-            DoAnimation(IDLE);
-            Invoke("EndWalk", 1f);
-            collision.transform.parent.gameObject.GetComponent<PlayerCode>().isBeingChased = false;
-            targetColl = null;
-        }
-    }
-
     void EndWalk()
     {
         DoAnimation(IDLE);
@@ -174,6 +181,8 @@ public class zombieController : MonoBehaviour
     public void Attack()
     {
         DoAnimation(ATTACK);
+        sprite.GetComponent<BoxCollider2D>().enabled = false;
+        Invoke("ResetColl", 2);
     }
 
     void ResetColl()

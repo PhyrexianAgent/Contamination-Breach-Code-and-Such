@@ -249,7 +249,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
         }
         TestForWeaponChange();
         isSprinting = Input.GetKey(KeyCode.LeftShift);
-        sprintingColl.enabled = isSprinting || isBeingChased;
+        sprintingColl.enabled = isSprinting || PlayerVarsToSave.beingChased;
     }
 
     void TestForWeaponChange()
@@ -510,9 +510,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
             if (enemyScript.health > 0) 
             {
                 enemyScript.Attack();
-                enemyScript.sprite.GetComponent<BoxCollider2D>().enabled = false;
-                enemyScript.Invoke("ResetColl", 1);
-                isBeingChased = true;
+                PlayerVarsToSave.beingChased = true;
                 TakeDamage(enemyScript.attackDamage);
             }
         }
@@ -565,5 +563,6 @@ class Weapon
 public static class PlayerVarsToSave 
 {
     public static bool hasShotGun = false;
+    public static bool beingChased = false;
 }
 
