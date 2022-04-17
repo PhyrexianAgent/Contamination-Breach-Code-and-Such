@@ -11,6 +11,7 @@ Contamination Breach/obj
 Contamination Breach/Packages
 Contamination Breach/Temp
 Contamination Breach/UserSettings
+Contamination Breach/Builded Game
 Contamination Breach/.vsconfig
 Contamination Breach/Assembly-CSharp.csproj
 Contamination Breach/Contamination Breach.sln
@@ -37,3 +38,5 @@ Contamination Breach/Assets/GameMap.unity
 
 
 Contamination Breach/Assets/Boxs and barrels/
+
+Contamination Breach/Builded Game.zip

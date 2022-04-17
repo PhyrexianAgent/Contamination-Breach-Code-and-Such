@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8217607881150560646
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8217607881150560640}
+  - component: {fileID: 8217607881150560641}
+  m_Layer: 0
+  m_Name: Dialog Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8217607881150560640
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8217607881150560646}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 713.439, y: 472.36267, z: -38.71351}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8217607881150560641
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8217607881150560646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d90e6777704c6cb4387022ec0527f304, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dialogs:
+  - messages:
+    - Welcome to your first assignment. You must first locate the tumor deep in this
+      part of the facility. You may need to pass some security barriers. I am sure
+      you can be recourceful enough for such a challenge.
+    - 'The original residents here are long gone due to a contamination breach. The
+      ones that did not escape were "repurposed" by the bioweapon that broke containment.
+      These "zombies", for lack of a better term, are blind but not deaf. '
+    - They wait and listen for disturbances as they guard the tumor. Guns are only
+      a last resort when you need them. Your blade should be sufficient enough to
+      dispach them quietly.
+    - Once you get to the tumor, plant 3 explosive charges which I already provided
+      to you. Place 1 at the tumor, and the other 2 on the walls on either side.
+    - I will speak to you again when you prime the charges. Good luck. You may need
+      it here.
+  - messages:
+    - The scanners now have detected those 3 charges you primed. Now get the hell
+      back to where you came. Once you leave, the charges will detonate and our work
+      is done.
+  dialogText: {fileID: 0}
+  dialogObject: {fileID: 0}

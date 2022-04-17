@@ -17,6 +17,7 @@ public class zombieController : MonoBehaviour
     const int SEARCHES_MAX = 2;
     const float TIME_BETWEEN_SEARCHES = 4;
     const float SEARCH_RADIUS = 4;
+    const float STEP_MAX_NUM_WALK = 0.3f;
 
     public int pos;
     public float speed;
@@ -24,21 +25,24 @@ public class zombieController : MonoBehaviour
     public float attackDamage = 15;
     public Sprite deadImage;
     public CircleCollider2D deathSound;
+    public AudioClip[] stepSounds;
 
     // Start is called before the first frame update
     private Rigidbody2D rb;
     private Animator anim;
     private NavMeshAgent agent;
     private string currentState = IDLE;
-    private string currentDirection = LEFT;
     private Vector2 startingPos;
     private Vector2 currentTarget;
-    private Vector2 oldPos;
     public float health = 100;
     private Collider2D targetColl;
+    private Vector2 oldPos;
     private bool playerFound = false;
     private int searchesLeft = 0;
     private bool onTheWay = false;
+    private Vector2 currentPos;
+    private float stepCount = 0;
+    private int currentStepIndex = 0;
     
     
     void Start()
@@ -58,6 +62,18 @@ public class zombieController : MonoBehaviour
        
     }
 
+    void DoStep()
+    {
+        stepCount += Time.deltaTime;
+        if (stepCount >= STEP_MAX_NUM_WALK)
+        {
+            stepCount = 0;
+            GetComponent<AudioSource>().clip = stepSounds[currentStepIndex];
+            GetComponent<AudioSource>().Play();
+            currentStepIndex = (currentStepIndex + 1) < stepSounds.Length ? currentStepIndex + 1 : 0;
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -71,6 +87,7 @@ public class zombieController : MonoBehaviour
                 }
                 oldPos = transform.position;
                 SetRotation();
+                DoStep();
                 break;
             case ATTACK:
                 if (!anim.GetCurrentAnimatorStateInfo(0).IsName(ATTACK))
@@ -88,6 +105,7 @@ public class zombieController : MonoBehaviour
         {
             DoAnimation(currentState);
         }
+        currentPos = transform.position;
     }
 
     void FollowTarget(Vector2 targetPos)
@@ -132,7 +150,7 @@ public class zombieController : MonoBehaviour
             agent.isStopped = true;
             GetComponent<BoxCollider2D>().enabled = false;
             deathSound.enabled = true;
-            Debug.Log("died");
+            transform.position = startingPos;
         }
     }
 
@@ -153,6 +171,7 @@ public class zombieController : MonoBehaviour
         anim.enabled = false;
         sprite.GetComponent<SpriteRenderer>().sprite = deadImage;
         deathSound.enabled = false;
+        transform.position = startingPos;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -209,16 +228,16 @@ public class zombieController : MonoBehaviour
             FollowTarget(collision.transform.position);
             DoAnimation(WALK);
             searchesLeft = SEARCHES_MAX;
-            Invoke("DoSearch", TIME_BETWEEN_SEARCHES+1);
+            //Invoke("DoSearch", TIME_BETWEEN_SEARCHES+1);
             onTheWay = true;
         }
-        else if (collision.gameObject.tag == "Player Area" && currentState != DEAD)
+        if (collision.gameObject.tag == "Player Area" && currentState != DEAD)
         {
             playerFound = true;
             DoAnimation(WALK);
             targetColl = collision;
             FollowTarget(collision.transform.position);
-            collision.transform.parent.gameObject.GetComponent<PlayerCode>().isBeingChased = true;
+            PlayerVarsToSave.beingChased = true;
             onTheWay = true;
         }
     }

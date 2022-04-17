@@ -318,7 +318,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 10
+  m_Radius: 17
 --- !u!1 &2818195916270461906
 GameObject:
   m_ObjectHideFlags: 0
@@ -641,6 +641,9 @@ MonoBehaviour:
   deathImage: {fileID: 0}
   shotLight: {fileID: 3793120260311441292}
   sparkPrefab: {fileID: 6779651445079960101, guid: 7f7ba77af6f0aae41ae06621374e0529, type: 3}
+  dialogManager: {fileID: 0}
+  levelEnd: {fileID: 0}
+  bombsRemaining: 3
 --- !u!50 &4750071604158476015
 Rigidbody2D:
   serializedVersion: 4
@@ -813,7 +816,7 @@ MonoBehaviour:
   - {x: -0.4828257, y: -0.3221966, z: 0}
   m_ShapePathHash: 329156524
   m_Mesh: {fileID: 0}
-  m_InstanceId: 64322
+  m_InstanceId: 166390
 --- !u!1 &8936890014595899743
 GameObject:
   m_ObjectHideFlags: 0

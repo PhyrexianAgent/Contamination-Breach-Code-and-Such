@@ -7,6 +7,7 @@ public class SpikeDisable : MonoBehaviour
     const float MAX_DISTANCE_TO_WORK = 3;
 
     public GameObject[] spikes;
+    public GameObject[] zombiesToEnable;
     public GameObject prompButton;
     public string acceptedCardCode;
 
@@ -53,6 +54,11 @@ public class SpikeDisable : MonoBehaviour
         foreach (GameObject trap in spikes)
         {
             trap.GetComponent<SpikeScript>().DisableSelf();
+        }
+
+        foreach (GameObject zombie in zombiesToEnable)
+        {
+            zombie.SetActive(true);
         }
     }
 

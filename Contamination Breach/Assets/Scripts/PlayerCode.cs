@@ -61,6 +61,9 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     public GameObject deathImage;
     public Light2D shotLight;
     public GameObject sparkPrefab;
+    public DialogManager dialogManager;
+    public GameObject levelEnd;
+    public int bombsRemaining = 3;
     //public bool lightUsable = true;
 
     private Rigidbody2D rigidbody;
@@ -85,6 +88,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
     private Weapon[] weaponList = { new Weapon(WEAPON_KNIFE, true), new Weapon(WEAPON_HAND_GUN, 6, 20), new Weapon(WEAPON_RIFLE, 15, 30) };
     private float health = 100;
     private bool shotLightExist = false;
+    private bool hasShotGun = false;
 
 
     
@@ -126,6 +130,12 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
         {
             shotLight.intensity -= Time.deltaTime * 10;
             shotLightExist = shotLight.intensity > 0;
+        }
+        if (bombsRemaining == 0)
+        {
+            bombsRemaining = -1;
+            dialogManager.StartDialog();
+            levelEnd.GetComponent<BoxCollider2D>().enabled = true;
         }
     }
 
@@ -186,10 +196,18 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
                 soundColls[1].GetComponent<CircleCollider2D>().enabled = true;
                 break;
         }
+
         Invoke("DisableColls", 0.3f);
         shotLightExist = true;
         shotLight.intensity = 3;
+        hasShotGun = true;
+        Invoke("DisablePlayerColl", 0.5f);
         //Invoke("DisableLightAnim", 0.2f);
+    }
+
+    void DisablePlayerColl()
+    {
+        hasShotGun = false;
     }
 
     void DisableLightAnim()
@@ -249,7 +267,7 @@ public class PlayerCode : MonoBehaviour //future note, the rifle reload is very 
         }
         TestForWeaponChange();
         isSprinting = Input.GetKey(KeyCode.LeftShift);
-        sprintingColl.enabled = isSprinting || PlayerVarsToSave.beingChased;
+        sprintingColl.enabled = isSprinting || PlayerVarsToSave.beingChased || hasShotGun;
     }
 
     void TestForWeaponChange()
