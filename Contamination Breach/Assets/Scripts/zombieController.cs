@@ -227,9 +227,9 @@ public class zombieController : MonoBehaviour
         {
             FollowTarget(collision.transform.position);
             DoAnimation(WALK);
-            searchesLeft = SEARCHES_MAX;
+            //searchesLeft = SEARCHES_MAX;
             //Invoke("DoSearch", TIME_BETWEEN_SEARCHES+1);
-            onTheWay = true;
+            //onTheWay = true;
         }
         if (collision.gameObject.tag == "Player Area" && currentState != DEAD)
         {

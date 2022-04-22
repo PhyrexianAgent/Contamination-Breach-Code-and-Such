@@ -24,6 +24,13 @@ public class ExplosiveScript : MonoBehaviour
             GetComponent<SpriteRenderer>().enabled = true;
             player.GetComponent<PlayerCode>().bombsRemaining--;
             GetComponent<AudioSource>().Play();
+            GetComponent<CircleCollider2D>().enabled = true;
+            Invoke("DisableColl", 0.4f);
         }
+    }
+
+    private void DisableColl()
+    {
+        GetComponent<CircleCollider2D>().enabled = false;
     }
 }
